@@ -284,7 +284,7 @@ int main(int argc, char** argv)
 	printf("Total number of jobs:%d\n", total_jobs);
 	printf("Unsched:%d\n", unsched);
 	sched_ratio = total_jobs - unsched;
-	sched_ration /= total_jobs;
+	sched_ratio /= total_jobs;
 	printf("Sched Ratio:%f\n", sched_ratio);
 
 	for (int i = 0; i < max_preemption; i++) {
