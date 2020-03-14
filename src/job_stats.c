@@ -86,7 +86,7 @@ static void print_stats(
 		max_migration = migrations;
 	log_migrations[migrations]++;
 
-	if (!statistic)
+	if (!statistic) {
 		if (want_ms)
 			printf(" %5u, %5u, %10.2f, %10.2f, %8d, %10.2f, %10.2f, %7d"
 				", %10.2f, %12u, %12u\n",
@@ -115,11 +115,12 @@ static void print_stats(
 						(unsigned long long) completion->rec->data.completion.exec_time,
 						preemptions,
 						migrations);
+	}
 }
 
 static void print_task_info(struct task *t)
 {
-	if (!statistic)
+	if (!statistic) {
 		if (want_ms)
 			printf("# task NAME=%s PID=%d COST=%.2f PERIOD=%.2f CPU=%d\n",
 						tsk_name(t),
@@ -134,6 +135,7 @@ static void print_task_info(struct task *t)
 						(unsigned long) exe(t),
 						(unsigned long) per(t),
 						tsk_cpu(t));
+	}	
 }
 
 static void usage(const char *str)
