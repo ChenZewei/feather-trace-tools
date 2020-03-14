@@ -175,10 +175,10 @@ int main(int argc, char** argv)
 	u32 period_filter = 0;
 	double sched_ratio = 0;
 
+	int opt;
+
 	memset(&log_preemptions, 0, sizeof(log_preemptions));
 	memset(&log_migrations, 0, sizeof(log_migrations));
-
-	int opt;
 
 	while ((opt = getopt(argc, argv, OPTSTR)) != -1) {
 		switch (opt) {
@@ -288,11 +288,11 @@ int main(int argc, char** argv)
 	printf("Sched Ratio:%f\n", sched_ratio);
 
 	for (int i = 0; i < max_preemption; i++) {
-		printf("Number of jobs that were preempted %d times: %d\n", i, log_preemption[i]);
+		printf("Number of jobs that were preempted %d times: %d\n", i, log_preemptions[i]);
 	}
 
 	for (int i = 0; i < max_migration; i++) {
-		printf("Number of jobs that migrated %d times: %d\n", i, log_migration[i]);
+		printf("Number of jobs that migrated %d times: %d\n", i, log_migrations[i]);
 	}
 
 	return 0;
