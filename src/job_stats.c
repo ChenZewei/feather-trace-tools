@@ -2,20 +2,24 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <vector>
 
 #include "load.h"
 #include "sched_trace.h"
 #include "eheap.h"
 
+
 /* limit search window in case of missing completions */
 #define MAX_COMPLETIONS_TO_CHECK 20
+#define MAX_LOG 128
+
 
 int want_ms = 0;
 int total_jobs = 0;
 int unsched = 0;
-vector<int> log_preemptions;
-vector<int> log_migrations;
+int[MAX_LOG] log_preemptions;
+int[MAX_LOG] log_migrations;
+int max_preemption = 0;
+int max_migration = 0;
 
 static double nano_to_ms(int64_t ns)
 {
@@ -72,23 +76,14 @@ static void print_stats(
 
 	count_preemptions(release, completion, &preemptions, &migrations);
 
-	if (preemptions > log_preemptions.size() - 1) {
-		for (int i = log_preemptions.size(); i < preemptions; i++) {
-			log_preemptions.push_back(0);
-		}
-		log_preemptions.push_back(1);
-	} else {
-		log_preemptions[preemptions]++;
-	}
+  if (preemptions > max_preemptions) 
+		max_preemptions = preemptions;
+	log_preemptions[preemptions]++;
 
-	if (migrations > log_migrations.size() - 1) {
-		for (int i = log_migrations.size(); i < migrations; i++) {
-			log_migrations.push_back(0);
-		}
-		log_migrations.push_back(1);
-	} else {
-		log_migrations[migrations]++;
-	}
+
+  if (migrations > max_migrations) 
+		max_migrations = migrations;
+	log_migrations[migrations]++;
 
 	if (want_ms)
 		printf(" %5u, %5u, %10.2f, %10.2f, %8d, %10.2f, %10.2f, %7d"
@@ -179,6 +174,9 @@ int main(int argc, char** argv)
 	const char* name_filter = 0;
 	u32 period_filter = 0;
 	double sched_ratio = 0;
+
+	memset(&log_preemptions, 0, sizeof(log_preemptions));
+	memset(&log_migrations, 0, sizeof(log_migrations));
 
 	int opt;
 
@@ -289,11 +287,11 @@ int main(int argc, char** argv)
 	sched_ration /= total_jobs;
 	printf("Sched Ratio:%f\n", sched_ratio);
 
-	for (int i = 0; i < log_preemption.size(); i++) {
+	for (int i = 0; i < max_preemptions; i++) {
 		printf("Number of jobs that were preempted %d times: %d\n", i, log_preemption[i]);
 	}
 
-	for (int i = 0; i < log_migration.size(); i++) {
+	for (int i = 0; i < max_migrations; i++) {
 		printf("Number of jobs that migrated %d times: %d\n", i, log_migration[i]);
 	}
 
