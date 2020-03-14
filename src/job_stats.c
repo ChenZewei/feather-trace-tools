@@ -194,6 +194,9 @@ int main(int argc, char** argv)
 		case 'm':
 			want_ms = 1;
 			break;
+		case 's':
+			statistic = 1;
+			break;
 		case 'p':
 			pid_filter = atoi(optarg);
 			if (!pid_filter)
@@ -206,9 +209,6 @@ int main(int argc, char** argv)
 			break;
 		case 'n':
 			name_filter = optarg;
-			break;
-		case 's':
-			statistic = 1;
 			break;
 		case 'h':
 			usage(NULL);
