@@ -16,8 +16,8 @@
 int want_ms = 0;
 int total_jobs = 0;
 int unsched = 0;
-int[MAX_LOG] log_preemptions;
-int[MAX_LOG] log_migrations;
+int log_preemptions[MAX_LOG];
+int log_migrations[MAX_LOG];
 int max_preemption = 0;
 int max_migration = 0;
 
