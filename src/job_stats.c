@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <vector>
 
 #include "load.h"
 #include "sched_trace.h"
@@ -11,6 +12,10 @@
 #define MAX_COMPLETIONS_TO_CHECK 20
 
 int want_ms = 0;
+int total_jobs = 0;
+int unsched = 0;
+vector<int> log_preemptions;
+vector<int> log_migrations;
 
 static double nano_to_ms(int64_t ns)
 {
@@ -61,8 +66,29 @@ static void print_stats(
 	lateness -= release->rec->data.release.deadline;
 	response  = completion->rec->data.completion.when;
 	response -= release->rec->data.release.release;
+	total_jobs++;
+	if (lateness > 0)
+		unsched++;
 
 	count_preemptions(release, completion, &preemptions, &migrations);
+
+	if (preemptions > log_preemptions.size() - 1) {
+		for (int i = log_preemptions.size(); i < preemptions; i++) {
+			log_preemptions.push_back(0);
+		}
+		log_preemptions.push_back(1);
+	} else {
+		log_preemptions[preemptions]++;
+	}
+
+	if (migrations > log_migrations.size() - 1) {
+		for (int i = log_migrations.size(); i < migrations; i++) {
+			log_migrations.push_back(0);
+		}
+		log_migrations.push_back(1);
+	} else {
+		log_migrations[migrations]++;
+	}
 
 	if (want_ms)
 		printf(" %5u, %5u, %10.2f, %10.2f, %8d, %10.2f, %10.2f, %7d"
@@ -152,6 +178,7 @@ int main(int argc, char** argv)
 	unsigned int pid_filter = 0;
 	const char* name_filter = 0;
 	u32 period_filter = 0;
+	double sched_ratio = 0;
 
 	int opt;
 
@@ -254,6 +281,20 @@ int main(int argc, char** argv)
 
 			}
 		}
+	}
+
+	printf("Total number of jobs:%d\n", total_jobs);
+	printf("Unsched:%d\n", unsched);
+	sched_ratio = total_jobs - unsched;
+	sched_ration /= total_jobs;
+	printf("Sched Ratio:%f\n", sched_ratio);
+
+	for (int i = 0; i < log_preemption.size(); i++) {
+		printf("Number of jobs that were preempted %d times: %d\n", i, log_preemption[i]);
+	}
+
+	for (int i = 0; i < log_migration.size(); i++) {
+		printf("Number of jobs that migrated %d times: %d\n", i, log_migration[i]);
 	}
 
 	return 0;
