@@ -76,13 +76,13 @@ static void print_stats(
 
 	count_preemptions(release, completion, &preemptions, &migrations);
 
-  if (preemptions > max_preemptions) 
-		max_preemptions = preemptions;
+  if (preemptions > max_preemption) 
+		max_preemption = preemptions;
 	log_preemptions[preemptions]++;
 
 
-  if (migrations > max_migrations) 
-		max_migrations = migrations;
+  if (migrations > max_migration) 
+		max_migration = migrations;
 	log_migrations[migrations]++;
 
 	if (want_ms)
@@ -287,11 +287,11 @@ int main(int argc, char** argv)
 	sched_ration /= total_jobs;
 	printf("Sched Ratio:%f\n", sched_ratio);
 
-	for (int i = 0; i < max_preemptions; i++) {
+	for (int i = 0; i < max_preemption; i++) {
 		printf("Number of jobs that were preempted %d times: %d\n", i, log_preemption[i]);
 	}
 
-	for (int i = 0; i < max_migrations; i++) {
+	for (int i = 0; i < max_migration; i++) {
 		printf("Number of jobs that migrated %d times: %d\n", i, log_migration[i]);
 	}
 
