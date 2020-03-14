@@ -162,7 +162,7 @@ static void usage(const char *str)
 	}
 }
 
-#define OPTSTR "rmp:n:t:h"
+#define OPTSTR "rmsp:n:t:h"
 
 int main(int argc, char** argv)
 {
