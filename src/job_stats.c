@@ -298,11 +298,11 @@ int main(int argc, char** argv)
 		sched_ratio /= total_jobs;
 		printf("Sched Ratio:%f\n", sched_ratio);
 
-		for (int i = 0; i < max_preemption; i++) {
+		for (int i = 0; i <= max_preemption; i++) {
 			printf("Number of jobs that were preempted %d times: %d\n", i, log_preemptions[i]);
 		}
 
-		for (int i = 0; i < max_migration; i++) {
+		for (int i = 0; i <= max_migration; i++) {
 			printf("Number of jobs that migrated %d times: %d\n", i, log_migrations[i]);
 		}
 	}
