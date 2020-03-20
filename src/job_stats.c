@@ -21,6 +21,7 @@ int log_migrations[MAX_LOG];
 int max_preemption = 0;
 int max_migration = 0;
 int statistic = 0;
+int schedulability = 0;
 
 static double nano_to_ms(int64_t ns)
 {
@@ -146,12 +147,13 @@ static void usage(const char *str)
 		"    st_job_stats [opts] <file.st>+\n"
 		"\n"
 		"  OPTIONS\n"
-		"     -r        	  -- skip jobs prior to task-system release\n"
-		"     -m        	  -- output milliseconds (default: nanoseconds)\n"
-		"     -p PID        -- show only data for the task with the given PID\n"
-		"     -n NAME       -- show only data for the task(s) with the given NAME\n"
-		"     -t PERIOD     -- show only data for the task(s) with the given PERIOD\n"
-		"     -s STATISTICS -- show statistics\n"
+		"     -r        	 		 -- skip jobs prior to task-system release\n"
+		"     -m        	 		 -- output milliseconds (default: nanoseconds)\n"
+		"     -p PID       		 -- show only data for the task with the given PID\n"
+		"     -n NAME       		-- show only data for the task(s) with the given NAME\n"
+		"     -t PERIOD     	  -- show only data for the task(s) with the given PERIOD\n"
+		"     -s STATISTICS 		-- show statistics\n"
+		"     -S SCHEDULABILITY -- show whether all tasks are schedulable (yes = 1)\n"
 		"\n\n"
 		);
 	if (str) {
@@ -162,7 +164,7 @@ static void usage(const char *str)
 	}
 }
 
-#define OPTSTR "rmsp:n:t:h"
+#define OPTSTR "rmsSp:n:t:h"
 
 int main(int argc, char** argv)
 {
@@ -196,6 +198,10 @@ int main(int argc, char** argv)
 			break;
 		case 's':
 			statistic = 1;
+			break;
+		case 'S':
+			statistic = 1;
+			schedulability = 1;
 			break;
 		case 'p':
 			pid_filter = atoi(optarg);
@@ -292,19 +298,24 @@ int main(int argc, char** argv)
 	}
 
 	if (statistic) {
-		printf("Total number of jobs:%d\n", total_jobs);
-		printf("Unsched:%d\n", unsched);
-		sched_ratio = total_jobs - unsched;
-		sched_ratio /= total_jobs;
-		printf("Sched Ratio:%f\n", sched_ratio);
+		if (!schedulability) {
+			printf("Total number of jobs:%d\n", total_jobs);
+			printf("Unsched:%d\n", unsched);
+			sched_ratio = total_jobs - unsched;
+			sched_ratio /= total_jobs;
+			printf("Sched Ratio:%f\n", sched_ratio);
 
-		for (int i = 0; i <= max_preemption; i++) {
-			printf("Number of jobs that were preempted %d times: %d\n", i, log_preemptions[i]);
-		}
+			for (int i = 0; i <= max_preemption; i++) {
+				printf("Number of jobs that were preempted %d times: %d\n", i, log_preemptions[i]);
+			}
 
-		for (int i = 0; i <= max_migration; i++) {
-			printf("Number of jobs that migrated %d times: %d\n", i, log_migrations[i]);
+			for (int i = 0; i <= max_migration; i++) {
+				printf("Number of jobs that migrated %d times: %d\n", i, log_migrations[i]);
+			}
+		} else {
+			printf("%d\n",(unsched==0)?1:0);
 		}
+	
 	}
 
 	return 0;
