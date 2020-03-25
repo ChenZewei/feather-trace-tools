@@ -68,12 +68,15 @@ static void print_stats(
 {
 	int64_t lateness;
 	u64 response;
+	u64 relative_deadline;
 	unsigned int preemptions = 0, migrations = 0;
 
 	lateness  = completion->rec->data.completion.when;
 	lateness -= release->rec->data.release.deadline;
 	response  = completion->rec->data.completion.when;
 	response -= release->rec->data.release.release;
+	relative_deadline = release->rec->data.release.deadline;
+	relative_deadline -= release->rec->data.release.release;
 	total_jobs++;
 	if (lateness > 0)
 		unsched++;
@@ -92,13 +95,12 @@ static void print_stats(
 	if (reserved) {
 		//  schedulable #preemptions #migrations
 		// printf("%d, %d, %d\n", lateness > 0, preemptions, migrations);
-		printf("%5u, %5u, %10.2f, %10.2f, %10.2f, %10.2f, %8d, %10.2f, %12u, %12u\n",
+		printf("%5u, %5u, %10.2f, %10.2f, %10.2f, %8d, %10.2f, %12u, %12u\n",
 						release->rec->hdr.pid,
 						release->rec->hdr.job,
-						nano_to_ms(release->rec->data.param.wcet),
-						nano_to_ms(release->rec->data.param.period),
-						nano_to_ms(response),
 						nano_to_ms(completion->rec->data.completion.exec_time),
+						nano_to_ms(relative_deadline),
+						nano_to_ms(response),
 						lateness > 0,
 						nano_to_ms(lateness),
 						preemptions,
