@@ -21,7 +21,9 @@ int log_migrations[MAX_LOG];
 int max_preemption = 0;
 int max_migration = 0;
 int statistic = 0;
+int mute = 0;
 int schedulability = 0;
+int reserved = 0;
 
 static double nano_to_ms(int64_t ns)
 {
@@ -87,7 +89,12 @@ static void print_stats(
 		max_migration = migrations;
 	log_migrations[migrations]++;
 
-	if (!statistic) {
+	if (reserved) {
+		//  schedulable #preemptions #migrations
+		printf("%d, %d, %d\n", lateness > 0, preemptions, migrations);
+	}
+
+	if (!mute) {
 		if (want_ms)
 			printf(" %5u, %5u, %10.2f, %10.2f, %8d, %10.2f, %10.2f, %7d"
 				", %10.2f, %12u, %12u\n",
@@ -121,7 +128,7 @@ static void print_stats(
 
 static void print_task_info(struct task *t)
 {
-	if (!statistic) {
+	if (!mute) {
 		if (want_ms)
 			printf("# task NAME=%s PID=%d COST=%.2f PERIOD=%.2f CPU=%d\n",
 						tsk_name(t),
@@ -154,6 +161,7 @@ static void usage(const char *str)
 		"     -t PERIOD     	  -- show only data for the task(s) with the given PERIOD\n"
 		"     -s STATISTICS 		-- show statistics\n"
 		"     -S SCHEDULABILITY -- show whether all tasks are schedulable (yes = 1)\n"
+		"     -R RESERVED			  -- reserved for DIY\n"
 		"\n\n"
 		);
 	if (str) {
@@ -164,7 +172,7 @@ static void usage(const char *str)
 	}
 }
 
-#define OPTSTR "rmsSp:n:t:h"
+#define OPTSTR "rmsSRp:n:t:h"
 
 int main(int argc, char** argv)
 {
@@ -197,11 +205,16 @@ int main(int argc, char** argv)
 			want_ms = 1;
 			break;
 		case 's':
+			mute = 1;
 			statistic = 1;
 			break;
 		case 'S':
-			statistic = 1;
+			mute = 1;
 			schedulability = 1;
+			break;
+		case 'R':
+			mute = 1;
+			reserved = 1;
 			break;
 		case 'p':
 			pid_filter = atoi(optarg);
@@ -251,7 +264,7 @@ int main(int argc, char** argv)
 	}
 
 	/* print header */
-	if (!statistic)
+	if (!mute )
 	printf("#%5s, %5s, %10s, %10s, %8s, %10s, %10s, %7s, %10s, %12s, %12s\n",
 	       "Task",
 	       "Job",
@@ -298,24 +311,23 @@ int main(int argc, char** argv)
 	}
 
 	if (statistic) {
-		if (!schedulability) {
-			printf("Total number of jobs:%d\n", total_jobs);
-			printf("Unsched:%d\n", unsched);
-			sched_ratio = total_jobs - unsched;
-			sched_ratio /= total_jobs;
-			printf("Sched Ratio:%f\n", sched_ratio);
+		printf("Total number of jobs:%d\n", total_jobs);
+		printf("Unsched:%d\n", unsched);
+		sched_ratio = total_jobs - unsched;
+		sched_ratio /= total_jobs;
+		printf("Sched Ratio:%f\n", sched_ratio);
 
-			for (int i = 0; i <= max_preemption; i++) {
-				printf("Number of jobs that were preempted %d times: %d\n", i, log_preemptions[i]);
-			}
-
-			for (int i = 0; i <= max_migration; i++) {
-				printf("Number of jobs that migrated %d times: %d\n", i, log_migrations[i]);
-			}
-		} else {
-			printf("%d\n",(unsched==0)?1:0);
+		for (int i = 0; i <= max_preemption; i++) {
+			printf("Number of jobs that were preempted %d times: %d\n", i, log_preemptions[i]);
 		}
-	
+
+		for (int i = 0; i <= max_migration; i++) {
+			printf("Number of jobs that migrated %d times: %d\n", i, log_migrations[i]);
+		}
+	}
+
+	if (schedulability) {
+		printf("%d\n",(unsched==0)?1:0);
 	}
 
 	return 0;
