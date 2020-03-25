@@ -91,7 +91,20 @@ static void print_stats(
 
 	if (reserved) {
 		//  schedulable #preemptions #migrations
-		printf("%d, %d, %d\n", lateness > 0, preemptions, migrations);
+		// printf("%d, %d, %d\n", lateness > 0, preemptions, migrations);
+		printf(" %5u, %5u, %10.2f, %10.2f, %8d, %10.2f, %10.2f, %7d"
+				", %10.2f, %12u, %12u\n",
+						release->rec->hdr.pid,
+						release->rec->hdr.job,
+						nano_to_ms(per(t)),
+						nano_to_ms(response),
+						lateness > 0,
+						nano_to_ms(lateness),
+						lateness > 0 ? nano_to_ms(lateness) : 0,
+						completion->rec->data.completion.forced,
+						nano_to_ms(completion->rec->data.completion.exec_time),
+						preemptions,
+						migrations);
 	}
 
 	if (!mute) {
